@@ -149,7 +149,7 @@ podTemplate(
               openshift.withCluster() {
               openshift.withProject("${devProject}") {
           
-          openshift.set("image", "dc/tasks", "tasks=image-registry.openshift-image-registry.svc:5000/${devProject}/tasks:${devTag}")
+          openshift.set("image", "dc/tasks", "tasks=docker-registry.default.svc:5000/${devProject}/tasks:${devTag}")
 
           
           // Update the Config Map which contains the users for the Tasks application
