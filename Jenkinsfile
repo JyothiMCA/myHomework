@@ -23,7 +23,6 @@ podTemplate(
     def mvnCmd = "mvn -s ../nexus_settings.xml"
 
     // Checkout Source Code.
-	  stages{
     stage('Checkout Source')
 	{   
       checkout scm
@@ -50,14 +49,13 @@ podTemplate(
 	  {
         echo "Building version ${devTag}"
         // TBD: Execute Maven Build
-         steps 
-		 {
+        
               echo "Building version ${devTag}"
 		  script
 		  {
               sh "${mvnCmd} clean package -DskipTests=true"
           } 
-	     }
+	     
         
       }
 
@@ -67,14 +65,13 @@ podTemplate(
       stage('Unit Tests') 
 	  {
         echo "Running Unit Tests"
-        steps
-		{ 
+       
 		   script 
 		   {
               sh "${mvnCmd} test"
 		   }
         // TBD: Execute Unit Tests
-		}
+		
 		
       }
 
@@ -85,8 +82,7 @@ podTemplate(
 
         // TBD: Execute Sonarqube Tests
         
-        steps 
-		{
+       
            script 
 		   {
               echo "Running Code Analysis"
@@ -94,7 +90,7 @@ podTemplate(
            }
         }
           
-       }
+       
 
       // Publish the built war file to Nexus
       stage('Publish to Nexus') 
@@ -102,13 +98,12 @@ podTemplate(
         echo "Publish to Nexus"
 
         // TBD: Publish to Nexus
-        steps
-		{
+        
 		   script
 		   {
              sh "${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com/repository/releases"
            }
-	    }
+	    
 
       }
 
@@ -118,8 +113,7 @@ podTemplate(
         echo "Building OpenShift container image tasks:${devTag}"
 
         // TBD: Build Image, tag Image
-        steps 
-		{
+        
     
           script 
 		  {
@@ -130,8 +124,7 @@ podTemplate(
            openshift.tag("tasks:latest", "tasks:${devTag}")
           } }
            }
-        }
-        
+       
         
       }
 
@@ -145,8 +138,7 @@ podTemplate(
         //      Make sure the application is running and ready before proceeding
         
         
-        steps 
-		{
+       
     
            script 
 		   {
@@ -175,7 +167,7 @@ podTemplate(
             sleep 5
             rc = openshift.selector("rc", "tasks-${dc_version}").object()
           }
-        }
+        
       }
     }
   }
@@ -191,7 +183,7 @@ podTemplate(
 
         // TBD: Copy image to Nexus container registry
          
-        steps {
+       
     
     script {
       
@@ -205,7 +197,7 @@ podTemplate(
         openshift.withProject("${prodProject}") {
           openshift.tag("${devProject}/tasks:${devTag}", "${devProject}/tasks:${prodTag}")
         }
-      }
+      
     }
   }
         
@@ -229,7 +221,6 @@ podTemplate(
         echo "Switching Production application to ${destApp}."
         // TBD: Execute switch
       }
-	}
     }
   }
 }
