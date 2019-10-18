@@ -157,6 +157,7 @@ podTemplate(
           openshift.selector('configmap', 'tasks-config').delete()
           def configmap = openshift.create('configmap', 'tasks-config', '--from-file=./configuration/application-users.properties', '--from-file=./configuration/application-roles.properties' )
 
+	  openshift.set("env dc/tasks VERSION='${devTag} (tasks-dev)' -n ${GUID}-tasks-dev1") 	       
           // Deploy the development application.
           openshift.selector("dc", "tasks").rollout().latest();
 
