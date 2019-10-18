@@ -33,11 +33,12 @@ podTemplate(
       // be accessible from other stages.
       // Extract version from the pom.xml
       def version = getVersionFromPom("pom.xml")
+	  def version = pom.version
 
       // TBD Set the tag for the development image: version + build number
-      def devTag  = "0.0-0"
+      def devTag  = "${version}-" + currentBuild.number
       // Set the tag for the production image: version
-      def prodTag = "0.0"
+      def prodTag = "${version}"
 
       // Using Maven build the war file
       // Do not run tests in this step
@@ -57,11 +58,11 @@ podTemplate(
       stage('Unit Tests') {
         echo "Running Unit Tests"
         steps{ 
-		scripts{
+		
         sh "${mvnCmd} test"
         // TBD: Execute Unit Tests
 		}
-		}
+		
       }
 
       // Using Maven to call SonarQube for Code Analysis
