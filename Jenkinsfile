@@ -38,8 +38,8 @@ podTemplate(
       def pom = readMavenPom file: 'pom.xml'
       def version = pom.version
 		
-	   def devProject  = "${prefix}-tasks-dev1"
-           def prodProject = "${prefix}-tasks-prod"
+	   def devProject  = "${GUID}-tasks-dev1"
+           def prodProject = "${GUID}-tasks-prod"
 
       // TBD Set the tag for the development image: version + build number
       def devTag  = "${version}-" + currentBuild.number
