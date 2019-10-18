@@ -47,8 +47,10 @@ podTemplate(
         // TBD: Execute Maven Build
          steps {
               echo "Building version ${devTag}"
+		 script{
               sh "${mvnCmd} clean package -DskipTests=true"
-       }
+       } 
+	 }
         
       }
 
@@ -58,8 +60,9 @@ podTemplate(
       stage('Unit Tests') {
         echo "Running Unit Tests"
         steps{ 
-		
+		script{
         sh "${mvnCmd} test"
+		}
         // TBD: Execute Unit Tests
 		}
 		
@@ -86,8 +89,12 @@ podTemplate(
 
         // TBD: Publish to Nexus
         steps{
+		script
+		{
           sh "${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com/repository/releases"
       }
+	}
+
       }
 
       // Build the OpenShift Image in OpenShift and tag it.
