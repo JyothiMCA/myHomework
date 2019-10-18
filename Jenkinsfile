@@ -14,20 +14,23 @@ podTemplate(
       resourceLimitCpu: "2"
     )
   ]
-) {
-  node('skopeo-pod') {
+) 
+{
+  node('skopeo-pod') 
+  {
     // Define Maven Command to point to the correct
     // settings for our Nexus installation
     def mvnCmd = "mvn -s ../nexus_settings.xml"
 
     // Checkout Source Code.
-    stage('Checkout Source') {
-    
+    stage('Checkout Source')
+	{   
       checkout scm
-      }
+    }
 
     // Build the Tasks Service
-    dir('openshift-tasks') {
+    dir('openshift-tasks') 
+	{
       // The following variables need to be defined at the top level
       // and not inside the scope of a stage - otherwise they would not
       // be accessible from other stages.
@@ -42,85 +45,98 @@ podTemplate(
 
       // Using Maven build the war file
       // Do not run tests in this step
-      stage('Build war') {
+      stage('Build war') 
+	  {
         echo "Building version ${devTag}"
         // TBD: Execute Maven Build
-         steps {
+         steps 
+		 {
               echo "Building version ${devTag}"
-		 script{
+		  script
+		  {
               sh "${mvnCmd} clean package -DskipTests=true"
-       } 
-	 }
+          } 
+	     }
         
       }
 
       // TBD: The next two stages should run in parallel
 
       // Using Maven run the unit tests
-      stage('Unit Tests') {
+      stage('Unit Tests') 
+	  {
         echo "Running Unit Tests"
-        steps{ 
-		script{
-        sh "${mvnCmd} test"
-		}
+        steps
+		{ 
+		   script 
+		   {
+              sh "${mvnCmd} test"
+		   }
         // TBD: Execute Unit Tests
 		}
 		
       }
 
       // Using Maven to call SonarQube for Code Analysis
-      stage('Code Analysis') {
+      stage('Code Analysis') 
+	  {
         echo "Running Code Analysis"
 
         // TBD: Execute Sonarqube Tests
         
-        steps {
-    script {
-      echo "Running Code Analysis"
-        sh "${mvnCmd} sonar:sonar -Dsonar.host.url=http://sonarqube-gpte-hw-cicd.apps.na311.openshift.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME} -Dsonar.projectVersion=${devTag}"
-    }
-   }
+        steps 
+		{
+           script 
+		   {
+              echo "Running Code Analysis"
+              sh "${mvnCmd} sonar:sonar -Dsonar.host.url=http://sonarqube-gpte-hw-cicd.apps.na311.openshift.opentlc.com/ -Dsonar.projectName=${JOB_BASE_NAME} -Dsonar.projectVersion=${devTag}"
+           }
+        }
           
-      }
+       }
 
       // Publish the built war file to Nexus
-      stage('Publish to Nexus') {
+      stage('Publish to Nexus') 
+	  {
         echo "Publish to Nexus"
 
         // TBD: Publish to Nexus
-        steps{
-		script
+        steps
 		{
-          sh "${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com/repository/releases"
-      }
-	}
+		   script
+		   {
+             sh "${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com/repository/releases"
+           }
+	    }
 
       }
 
       // Build the OpenShift Image in OpenShift and tag it.
-      stage('Build and Tag OpenShift Image') {
+      stage('Build and Tag OpenShift Image') 
+	  {
         echo "Building OpenShift container image tasks:${devTag}"
 
         // TBD: Build Image, tag Image
-        steps {
+        steps 
+		{
     
-    script {
-      openshift.withCluster() {
-        openshift.withProject("${devProject}") {
-          openshift.selector("bc", "tasks").startBuild("--from-file=./target/openshift-tasks.war", "--wait=true")
+          script 
+		  {
+            openshift.withCluster() {
+             openshift.withProject("${devProject}") {
+              openshift.selector("bc", "tasks").startBuild("--from-file=./target/openshift-tasks.war", "--wait=true")
 
            openshift.tag("tasks:latest", "tasks:${devTag}")
+          } }
+           }
         }
-      }
-    }
-  }
-        
         
         
       }
 
       // Deploy the built image to the Development Environment.
-      stage('Deploy to Dev') {
+      stage('Deploy to Dev') 
+	  {
         echo "Deploying container image to Development Project"
 
         // TBD: Deploy to development Project
@@ -128,13 +144,15 @@ podTemplate(
         //      Make sure the application is running and ready before proceeding
         
         
-        steps {
+        steps 
+		{
     
-    script {
-      // Update the Image on the Development Deployment Config
-      openshift.withCluster() {
-        openshift.withProject("${devProject}") {
-          // OpenShift 4
+           script 
+		   {
+             // Update the Image on the Development Deployment Config
+              openshift.withCluster() {
+              openshift.withProject("${devProject}") {
+          
           openshift.set("image", "dc/tasks", "tasks=image-registry.openshift-image-registry.svc:5000/${devProject}/tasks:${devTag}")
 
           
@@ -175,8 +193,7 @@ podTemplate(
         steps {
     
     script {
-      // OpenShift 4
-      //sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:admin docker://image-registry.openshift-image-registry.svc.cluster.local:5000/${devProject}/tasks:${devTag} docker://nexus-registry-ac4f-nexus.apps.cluster-0afd.0afd.example.opentlc.com/tasks:${devTag}"
+      
       
       sh "skopeo copy --src-tls-verify=false --dest-tls-verify=false --src-creds openshift:\$(oc whoami -t) --dest-creds admin:redhat docker://docker-registry.default.svc.cluster.local:5000/${devProject}/tasks:${devTag} docker://nexus3-gpte-hw-cicd.apps.na311.openshift.opentlc.com/tasks:${devTag}"
 
