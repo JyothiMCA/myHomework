@@ -22,8 +22,9 @@ podTemplate(
 
     // Checkout Source Code.
     stage('Checkout Source') {
+      steps{
       checkout scm
-    }
+      }}
 
     // Build the Tasks Service
     dir('openshift-tasks') {
