@@ -23,6 +23,7 @@ podTemplate(
     def mvnCmd = "mvn -s ../nexus_settings.xml"
 
     // Checkout Source Code.
+	  stages{
     stage('Checkout Source')
 	{   
       checkout scm
@@ -228,6 +229,7 @@ podTemplate(
         echo "Switching Production application to ${destApp}."
         // TBD: Execute switch
       }
+	}
     }
   }
 }
