@@ -22,9 +22,9 @@ podTemplate(
 
     // Checkout Source Code.
     stage('Checkout Source') {
-      steps{
+    
       checkout scm
-      }}
+      }
 
     // Build the Tasks Service
     dir('openshift-tasks') {
@@ -56,9 +56,12 @@ podTemplate(
       // Using Maven run the unit tests
       stage('Unit Tests') {
         echo "Running Unit Tests"
-         
+        steps{ 
+		scripts{
         sh "${mvnCmd} test"
         // TBD: Execute Unit Tests
+		}
+		}
       }
 
       // Using Maven to call SonarQube for Code Analysis
